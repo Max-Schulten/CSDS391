@@ -1,57 +1,63 @@
 import sys
 import random
 
-# Setting goal state to compare
+# Define the goal state for the 8-puzzle as a 3x3 grid.
 goal_state = [
     [0, 1, 2],
     [3, 4, 5],
     [6, 7, 8]
-            ]
+]
 
-# 2D array that will hold the current state
+# Initialize the current state to be the same as the goal state.
 current_state = [
     [0, 1, 2],
     [3, 4, 5],
     [6, 7, 8]
-            ]
+]
 
 
-# Main method that will run when puzzle.py is called
+# Main method that runs when the script is executed.
 def main():
-    if (len(sys.argv) != 1):
-        # Receives filename from CLI
+    if len(sys.argv) != 1:
+        # Check if a filename is provided in the command line arguments.
         fileName = sys.argv[1]
 
-        # Opens file to read
+        # Open the provided file in read mode.
         file = open(fileName, "r")
 
-        # Keeps track of what line we're on
+        # Initialize line number for tracking the current line in the file.
         lineNumber = 1
 
-        # Execute commands line by line
+        # Read and execute commands line by line from the file.
         for line in file:
             executeCommand(line.rstrip(), lineNumber)
             lineNumber += 1
+
+        # Close the file after processing all lines.
+        file.close()
     else:
+        # If no file is provided, run the command-line interface (CLI).
         runCLI()
 
 
+# Method to run the interactive command-line interface.
 def runCLI():
     while True:
+        # Prompt the user to enter a command.
         cmd = input("Enter a command:\n")
+        # Execute the entered command.
         executeCommand(cmd, 'N/A')
 
 
-# Method that executes some command
+# Method to execute a given command based on its input.
 def executeCommand(cmd, line):
-
-    # Splitting string into array to tokenize
+    # Split the input command into an array of tokens.
     arr = cmd.split(' ')
-    cmd = arr[0]
-    arr.pop(0)
+    cmd = arr[0]  # Extract the command.
+    arr.pop(0)    # Remove the command from the array.
 
-    # Bunch of if blocks to check what command is called
-    if cmd != "#" and cmd != "//":
+    # Execute the appropriate function based on the command.
+    if cmd != "#" and cmd != "//":  # Ignore comments.
         if cmd == "setState":
             setState(arr)
         elif cmd == "printState":
@@ -61,31 +67,35 @@ def executeCommand(cmd, line):
         elif cmd == "scrambleState":
             scrambleState(arr[0])
         else:
-            print(f"Error: invalid command: {line}")
+            # Print an error message for invalid commands.
+            print(f"Error: invalid command at line {line}")
 
 
-# Method to set current State
+# Method to set the current state to a new state provided as input.
 def setState(state):
     index = 0
     used = []
-    if (len(state) == 9):
+
+    # Ensure that exactly 9 numbers are provided to set the state.
+    if len(state) == 9:
         for i in range(3):
             for j in range(3):
                 num = int(state[index])
-                if num in used:
+                if num in used:  # Check for duplicate numbers.
                     break
                 current_state[i][j] = num
                 index += 1
+                used.append(num)
             else:
                 continue
             break
 
 
-# Method that prints the current state
+# Method to print the current state of the 8-puzzle.
 def printState():
     out = ""
     for x in current_state:
-        out += "\n-------\n|"
+        out += "\n-------\n|"  # Formatting the grid with lines.
         for y in x:
             out += f"{y}|"
 
@@ -93,17 +103,22 @@ def printState():
     print(f'{out}\n')
 
 
-# Method that scrambles the state by making n random moves from goal state
+# Method to scramble current state by making n random moves from goal state.
 def scrambleState(n):
     global current_state
-    current_state = goal_state
-    i = 0
-    j = 0
+    current_state = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8]
+    ]
+    i, j = 0, 0  # Initial position of the empty space (zero).
     moves = ['up', 'down', 'left', 'right']
+
+    # Make n random moves.
     for x in range(int(n)):
         dir = random.choice(moves)
         valid = checkMove(dir, i, j)
-        while not valid:
+        while not valid:  # Find a valid move.
             dir = random.choice(moves)
             valid = checkMove(dir, i, j)
         if dir == 'up':
@@ -117,32 +132,29 @@ def scrambleState(n):
         move(dir)
 
 
-# Method that makes some move
+# Method to move the empty space (zero) in the specified direction.
 def move(direction):
-    zero = findZero()
-    i = zero[0]
-    j = zero[1]
+    zero = findZero()  # Find the position of the empty space.
+    i, j = zero[0], zero[1]
+
+    # Check if the move is valid and execute it.
     if checkMove(direction, i, j):
         if direction == "up":
-            current_state[i][j] = current_state[i-1][j]
-            current_state[i-1][j] = 0
+            current_state[i][j], current_state[i-1][j] = current_state[i-1][j], 0
         elif direction == "left":
-            current_state[i][j] = current_state[i][j-1]
-            current_state[i][j-1] = 0
+            current_state[i][j], current_state[i][j-1] = current_state[i][j-1], 0
         elif direction == "down":
-            current_state[i][j] = current_state[i+1][j]
-            current_state[i+1][j] = 0
+            current_state[i][j], current_state[i+1][j] = current_state[i+1][j], 0
         elif direction == "right":
-            current_state[i][j] = current_state[i][j+1]
-            current_state[i][j+1] = 0
+            current_state[i][j], current_state[i][j+1] = current_state[i][j+1], 0
     else:
+        # Print an error message if the move is invalid.
         print("Error: Invalid Move")
 
 
-# Helper method that checks if a move is possible
+# Helper method to check if a move in a given direction is possible.
 def checkMove(direction, i, j):
-
-    # Essentially just prevents an index out of bounds
+    # Prevent moves that would go out of bounds.
     if direction == "up" and i-1 >= 0:
         return True
     elif direction == "down" and i+1 <= 2:
@@ -155,7 +167,7 @@ def checkMove(direction, i, j):
         return False
 
 
-# Helper method that locates the index of the zero a.k.a. the empty table
+# Helper method to find the position of the empty space (zero) in the current state.
 def findZero():
     for i in range(3):
         for j in range(3):
@@ -163,6 +175,7 @@ def findZero():
                 return [i, j]
 
 
-# Semantic python best practices for main method call
+# Standard Python convention to run the main method when the script is executed directly.
 if __name__ == "__main__":
     main()
+

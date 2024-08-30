@@ -1,5 +1,1 @@
 printState
-scrambleState 5
-printState
-# Comment in python
-// Comment in java
