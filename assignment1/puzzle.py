@@ -1,4 +1,5 @@
 import sys
+import random
 
 # Setting goal state to compare
 goal_state = [
@@ -17,19 +18,28 @@ current_state = [
 
 # Main method that will run when puzzle.py is called
 def main():
-    # Receives filename from CLI
-    fileName = sys.argv[1]
+    if (len(sys.argv) != 1):
+        # Receives filename from CLI
+        fileName = sys.argv[1]
 
-    # Opens file to read
-    file = open(fileName, "r")
+        # Opens file to read
+        file = open(fileName, "r")
 
-    # Keeps track of what line we're on
-    lineNumber = 1
+        # Keeps track of what line we're on
+        lineNumber = 1
 
-    # Execute commands line by line
-    for line in file:
-        executeCommand(line.rstrip(), lineNumber)
-        lineNumber += 1
+        # Execute commands line by line
+        for line in file:
+            executeCommand(line.rstrip(), lineNumber)
+            lineNumber += 1
+    else:
+        runCLI()
+
+
+def runCLI():
+    while True:
+        cmd = input("Enter a command:\n")
+        executeCommand(cmd, 'N/A')
 
 
 # Method that executes some command
@@ -49,18 +59,26 @@ def executeCommand(cmd, line):
         elif cmd == "move":
             move(arr[0])
         elif cmd == "scrambleState":
-            scrambleState(3)
+            scrambleState(arr[0])
         else:
-            print(f"Error at line: {line}")
+            print(f"Error: invalid command: {line}")
 
 
 # Method to set current State
 def setState(state):
     index = 0
-    for i in range(3):
-        for j in range(3):
-            current_state[i][j] = int(state[index])
-            index += 1
+    used = []
+    if (len(state) == 9):
+        for i in range(3):
+            for j in range(3):
+                num = int(state[index])
+                if num in used:
+                    break
+                current_state[i][j] = num
+                index += 1
+            else:
+                continue
+            break
 
 
 # Method that prints the current state
@@ -77,8 +95,26 @@ def printState():
 
 # Method that scrambles the state by making n random moves from goal state
 def scrambleState(n):
-
-    print(f'making {n} random moves...')
+    global current_state
+    current_state = goal_state
+    i = 0
+    j = 0
+    moves = ['up', 'down', 'left', 'right']
+    for x in range(int(n)):
+        dir = random.choice(moves)
+        valid = checkMove(dir, i, j)
+        while not valid:
+            dir = random.choice(moves)
+            valid = checkMove(dir, i, j)
+        if dir == 'up':
+            i -= 1
+        elif dir == 'down':
+            i += 1
+        elif dir == 'left':
+            j -= 1
+        elif dir == 'right':
+            j += 1
+        move(dir)
 
 
 # Method that makes some move
