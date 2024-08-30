@@ -81,23 +81,42 @@ def scrambleState(n):
     print(f'making {n} random moves...')
 
 
-# Method that makes some move:
+# Method that makes some move
 def move(direction):
     zero = findZero()
     i = zero[0]
     j = zero[1]
-    if direction == "up":
-        if i-1 < 0:
-            print("Error: Invalid move")
-        else:
+    if checkMove(direction, i, j):
+        if direction == "up":
             current_state[i][j] = current_state[i-1][j]
             current_state[i-1][j] = 0
-    if direction == "left":
-        if j-1 < 0:
-            print("Error: Invalid move")
-        else:
+        elif direction == "left":
             current_state[i][j] = current_state[i][j-1]
             current_state[i][j-1] = 0
+        elif direction == "down":
+            current_state[i][j] = current_state[i+1][j]
+            current_state[i+1][j] = 0
+        elif direction == "right":
+            current_state[i][j] = current_state[i][j+1]
+            current_state[i][j+1] = 0
+    else:
+        print("Error: Invalid Move")
+
+
+# Helper method that checks if a move is possible
+def checkMove(direction, i, j):
+
+    # Essentially just prevents an index out of bounds
+    if direction == "up" and i-1 >= 0:
+        return True
+    elif direction == "down" and i+1 <= 2:
+        return True
+    elif direction == "left" and j-1 >= 0:
+        return True
+    elif direction == "right" and j+1 <= 2:
+        return True
+    else:
+        return False
 
 
 # Helper method that locates the index of the zero a.k.a. the empty table

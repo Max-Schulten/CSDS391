@@ -5,5 +5,14 @@ printState
 move left
 printState
 move left
+move right
+printState
+move down
+printState
+move right
+move right
+move down
+move down
+printState
 # Comment in python
-// Commen in java
+// Comment in java
