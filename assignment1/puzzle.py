@@ -18,6 +18,9 @@ current_state = [
 
 # Main method that runs when the script is executed.
 def main():
+    # Setting seed for rng
+    random.seed(123)
+
     if len(sys.argv) != 1:
         # Check if a filename is provided in the command line arguments.
         fileName = sys.argv[1]
@@ -57,7 +60,7 @@ def executeCommand(cmd, line):
     arr.pop(0)    # Remove the command from the array.
 
     # Execute the appropriate function based on the command.
-    if cmd != "#" and cmd != "//":  # Ignore comments.
+    if cmd != "#" and cmd != "//" and cmd != "":  # Ignore comments and blanks.
         if cmd == "setState":
             setState(arr)
         elif cmd == "printState":
@@ -73,6 +76,7 @@ def executeCommand(cmd, line):
 
 # Method to set the current state to a new state provided as input.
 def setState(state):
+    global current_state
     index = 0
     used = []
 
@@ -81,14 +85,15 @@ def setState(state):
         for i in range(3):
             for j in range(3):
                 num = int(state[index])
-                if num in used:  # Check for duplicate numbers.
-                    break
+                if num not in used:
+                    used.append(num)
                 current_state[i][j] = num
                 index += 1
-                used.append(num)
-            else:
-                continue
-            break
+        if len(used) != 9:
+            print("Error: Invalid puzzle state")
+            current_state = [[0, 1, 2], [4, 5, 6], [7, 8, 9]]
+    else:
+        print("Error: Invalid puzzle state")
 
 
 # Method to print the current state of the 8-puzzle.
