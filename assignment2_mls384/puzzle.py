@@ -39,6 +39,7 @@ class Node:
     def __str__(self):
         return (f'\n{self.state}\n')
 
+
 # Define the goal state for the 8-puzzle as a 3x3 grid.
 goal_state = [
     [0, 1, 2],
@@ -250,7 +251,9 @@ def findZero(state=None):
                     return [i, j]
 
 
+# Method for DFS, iterative implementation
 def dfs(maxnodes):
+    # Checking if argument for maxnodes was provided in txt file
     if maxnodes == -1:
         maxnodes = 1000
 
@@ -259,7 +262,7 @@ def dfs(maxnodes):
     # Defining counter to limit maxnodes
     counter = 0
 
-    # Defining the queue for BFS
+    # Defining the queue for DFS
     stack = [root]
 
     # Defining an array with the solution steps as elements
@@ -268,6 +271,7 @@ def dfs(maxnodes):
     # Actual BFS search implementation
     while stack and counter < maxnodes:
         node = stack.pop()
+        # If we've reached the goal the backtrack function will recursively find the solution steps
         if node.state == goal_state:
             solution = backtrack(node)
             break
@@ -277,6 +281,7 @@ def dfs(maxnodes):
                 stack.append(newChild)
                 counter += 1
     # Check all remaining created but unvisited nodes
+    # Doesn't count towards created nodes
     for node in stack:
         if node.state == goal_state:
             solution = backtrack(node)
@@ -292,8 +297,9 @@ def dfs(maxnodes):
         print(string)
 
 
-
+# BFS implementation
 def bfs(maxnodes):
+    # Checking if argument was provided
     if maxnodes == -1:
         maxnodes = 1000
 
@@ -320,10 +326,12 @@ def bfs(maxnodes):
                 queue.append(newChild)
                 counter += 1
 
+    # Iterating over all unvisitied, but previously created nodes to find solution if there
     for node in queue:
         if node.state == goal_state:
             solution = backtrack(node)
 
+    # Checking if a solution was found
     if not solution:
         print(f"Error: maxnodes limit ({maxnodes}) reached")
     else:
@@ -334,17 +342,17 @@ def bfs(maxnodes):
         print(string)
 
 
+# Recursively retreats over the graph based on the direction of the nodes
 def backtrack(node):
     solution = [node.direction]
     parent = node.parent
     while parent is not None:
         solution.append(parent.direction)
         parent = parent.parent
+    # Reverses the order
     return solution[::-1]
 
 
 # Standard Python convention to run the main method when the script is executed directly.
 if __name__ == "__main__":
     main()
-
-
