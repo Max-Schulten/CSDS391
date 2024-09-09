@@ -54,6 +54,9 @@ current_state = [
     [6, 7, 8]
 ]
 
+# Defining global lineNumber counter
+lineNumber = 1
+
 
 # Main method that runs when the script is executed.
 def main():
@@ -68,12 +71,13 @@ def main():
         file = open(fileName, "r")
 
         # Initialize line number for tracking the current line in the file.
-        lineNumber = 1
+        global lineNumber
 
         # Read and execute commands line by line from the file.
         for line in file:
             executeCommand(line.rstrip(), lineNumber)
             lineNumber += 1
+            print(str(line))
 
         # Close the file after processing all lines.
         file.close()
@@ -138,7 +142,7 @@ def setState(state):
                 current_state[i][j] = num
                 index += 1
         if len(used) != 9:
-            print("Error: Invalid puzzle state")
+            print(f"Error: Invalid puzzle state: {lineNumber}")
             current_state = [[0, 1, 2], [4, 5, 6], [7, 8, 9]]
     else:
         print("Error: Invalid puzzle state")
@@ -203,7 +207,7 @@ def move(direction, state=None):
                 current_state[i][j], current_state[i][j+1] = current_state[i][j+1], 0
         else:
             # Print an error message if the move is invalid.
-            print("Error: Invalid Move")
+            print(f"Error: Invalid Move: {lineNumber}")
     else:
         zero = findZero(state)
 
@@ -260,7 +264,7 @@ def dfs(maxnodes):
     root = Node(state=current_state)
 
     # Defining counter to limit maxnodes
-    counter = 0
+    counter = 1
 
     # Defining the queue for DFS
     stack = [root]
@@ -277,9 +281,12 @@ def dfs(maxnodes):
             break
         else:
             for child in node.children:
-                newChild = Node(parent=node, direction=child)
-                stack.append(newChild)
-                counter += 1
+                if counter < maxnodes:
+                    newChild = Node(parent=node, direction=child)
+                    stack.append(newChild)
+                    counter += 1
+                else:
+                    break
     # Check all remaining created but unvisited nodes
     # Doesn't count towards created nodes
     for node in stack:
@@ -288,12 +295,12 @@ def dfs(maxnodes):
 
     # Checking if a solution has been found
     if not solution:
-        print(f"Error: maxnodes limit ({maxnodes}) reached")
+        print(f"Error: maxnodes limit ({maxnodes}) reached: {lineNumber}")
     else:
-        string = f"Nodes created during search: {counter}\nSolution length = {len(solution)}\nMove sequence:\n"
+        string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:"
         for move in solution:
             if move:
-                string += f"move {move}\n"
+                string += f"\nmove {move}\n"
         print(string)
 
 
@@ -322,10 +329,12 @@ def bfs(maxnodes):
             break
         else:
             for child in node.children:
-                newChild = Node(parent=node, direction=child)
-                queue.append(newChild)
-                counter += 1
-
+                if counter < maxnodes:
+                    newChild = Node(parent=node, direction=child)
+                    queue.append(newChild)
+                    counter += 1
+                else:
+                    break
     # Iterating over all unvisitied, but previously created nodes to find solution if there
     for node in queue:
         if node.state == goal_state:
@@ -335,7 +344,7 @@ def bfs(maxnodes):
     if not solution:
         print(f"Error: maxnodes limit ({maxnodes}) reached")
     else:
-        string = f"Nodes created during search: {counter}\nSolution length = {len(solution)}\nMove sequence:\n"
+        string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:\n"
         for move in solution:
             if move:
                 string += f"move {move}\n"
