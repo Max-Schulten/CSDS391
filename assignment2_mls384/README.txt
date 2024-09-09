@@ -1,10 +1,8 @@
-Exercises 1 and 2 are in the file 'HW1_mls384.pdf'.
-
-Exercises 3 through 5 are present in the 'puzzle.py' file. 
-
-2 Modules are in use: 
+4 Modules are in use: 
     sys --- Used to read file name from CLI
     random -- Used to randomly generate moves during scrambling
+    re -- Used for regex matching
+    copy -- Used to make deepcopies of arrays
 
 Exercise 6 is in the 'test.txt' & 'test_results.txt' files.
 
