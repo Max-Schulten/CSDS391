@@ -2,6 +2,7 @@ import sys
 import random
 import re
 import copy
+import math
 
 
 # Defining a class for a node to use for DFS and BFS
@@ -121,6 +122,11 @@ def executeCommand(cmd, line):
                 dfs(maxnodes)
             elif arr[0] == "BFS":
                 bfs(maxnodes)
+        elif cmd == "heuristic":
+            if arr[0] == "h1":
+                print(h1())
+            elif arr[0] == "h2":
+                print(h2())
         else:
             # Print an error message for invalid commands.
             print(f"Error: invalid command at line {line}")
@@ -360,6 +366,45 @@ def backtrack(node):
         parent = parent.parent
     # Reverses the order
     return solution[::-1]
+
+
+# Function for h1, heuristic: number of displaced tiles from goal
+def h1(state=current_state):
+    # Store number of displaced tiles in counter
+    counter = 0
+
+    # For each of non-zero element check if its displacement from goal is 0
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] != 0 and displacement(state[i][j], [i, j]) > 0:
+                counter += 1
+
+    return counter
+
+
+# Function for h2, heuristic: Manhattan
+def h2(state=current_state):
+    # Store sum of displaced tiles in counter
+    sum = 0
+
+    # For each of non-zero element check if its displacement from goal is 0
+    for i in range(3):
+        for j in range(3):
+            distance = displacement(state[i][j], [i, j])
+            if state[i][j] != 0 and distance > 0:
+                sum += distance
+
+    return sum
+
+
+# Function that finds an elements distance from the its goal position
+def displacement(element, coords):
+    # Computing coordiantes of goal
+    goal_i = math.floor(int(element)/3)
+    goal_j = int(element) - (math.floor(int(element)/3)*3)
+
+    # Computing displacement
+    return abs(goal_i - coords[0]) + abs(goal_j - coords[1])
 
 
 # Standard Python convention to run the main method when the script is executed directly.
