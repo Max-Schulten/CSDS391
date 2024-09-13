@@ -3,14 +3,15 @@ import random
 import re
 import copy
 import math
+import queue
 
 
 # Defining a class for a node to use for DFS and BFS
 class Node:
     # Constructor
-    def __init__(self, parent=None, direction=None, state=None):
+    def __init__(self, parent=None, direction=None, state=None, cost=0):
         # Using optional parameters because root node will not have parent or directoin but will have a state argument
-        if parent and direction and not state:
+        if parent and direction:
             # Trivial Constrcutor Tasks
             self.parent = parent
             self.direction = direction
@@ -19,7 +20,7 @@ class Node:
             self.state = arr
             self.zero = findZero(self.state)
         # If a state is provided it will be the root node
-        elif state:
+        elif state and not parent and not direction:
             # Setting these fields for semantics
             self.parent = None
             self.direction = None
@@ -35,10 +36,16 @@ class Node:
                 children.append(dir)
         # Storing valid directions for children
         self.children = children
+        # Setting the cost function result
+        self.cost = cost
 
     # Adding this string representation for debugging purposes
     def __str__(self):
         return (f'\n{self.state}\n')
+
+    # Adding this function to allow comparison between nodes
+    def __lt__(self, other):
+        return self.cost < other.cost
 
 
 # Define the goal state for the 8-puzzle as a 3x3 grid.
@@ -57,6 +64,10 @@ current_state = [
 
 # Defining global lineNumber counter
 lineNumber = 1
+
+
+# Defining a global set for repeated state checking
+used = {}
 
 
 # Main method that runs when the script is executed.
@@ -113,6 +124,12 @@ def executeCommand(cmd, line):
             move(arr[0])
         elif cmd == "scrambleState":
             scrambleState(arr[0])
+        elif cmd == "solve" and arr[0] == "A*":
+            if len(arr) == 3:
+                maxnodes = int((re.search(r'\d+', arr[2])).group())
+            else:
+                maxnodes = -1
+            astar(maxnodes, arr[1])
         elif cmd == "solve":
             if len(arr) == 2:
                 maxnodes = int((re.search(r'\d+', arr[1])).group())
@@ -122,7 +139,6 @@ def executeCommand(cmd, line):
                 dfs(maxnodes)
             elif arr[0] == "BFS":
                 bfs(maxnodes)
-        elif cmd == "heuristic":
             if arr[0] == "h1":
                 print(h1())
             elif arr[0] == "h2":
@@ -405,6 +421,71 @@ def displacement(element, coords):
 
     # Computing displacement
     return abs(goal_i - coords[0]) + abs(goal_j - coords[1])
+
+
+# A* implementation
+def astar(maxnodes, heuristic):
+    # Max nodes handling in case no arg provided
+    if maxnodes == -1:
+        maxnodes = 1000
+    if heuristic == "h1":
+        heuristic = h1
+    if heuristic == "h2":
+        heuristic = h2
+
+    # Initializing Priority Queue
+    q = queue.PriorityQueue()
+
+    global used
+
+    # Initializing the root
+    root = Node(state=current_state, cost=0)
+
+    # Insert the root
+    q.put(root)
+
+    # Using a counter to keep track of initialize nodes
+    counter = 1
+
+    # Initializing None solution var for checking if we have found one later
+    solution = None
+
+    # Main loop
+    while not q.empty() and counter <= maxnodes:
+        node = q.get()
+        if node.state == goal_state:
+            solution = backtrack(node)
+            break
+        else:
+            for child in node.children:
+                if counter < maxnodes:
+                    nextState = move(child, state=copy.deepcopy(node.state))
+                    if statecheck(nextState):
+                        newChild = Node(parent=node, direction=child, state=nextState, cost=node.cost+1)
+                        newChild.cost += heuristic(newChild.state)
+                        q.put(newChild)
+                        counter += 1
+                else:
+                    break
+    if not solution:
+        print(f"Error: maxnodes limit ({maxnodes}) reached")
+    else:
+        string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:\n"
+        for turn in solution:
+            if turn:
+                string += f"move {turn}\n"
+        print(string)
+    # Reset set since it persists otherwise (caused me a massive headache lol)
+    used = {}
+
+
+# Implementing repeated state checking
+def statecheck(state):
+    if used.get(str(state), False):
+        return False
+    else:
+        used[str(state)] = True
+        return True
 
 
 # Standard Python convention to run the main method when the script is executed directly.
