@@ -453,6 +453,8 @@ def astar(maxnodes, heuristic):
     # Main loop
     while not q.empty() and counter <= maxnodes:
         node = q.get()
+        used[str(node.state)] = True
+
         if node.state == goal_state:
             solution = backtrack(node)
             break
