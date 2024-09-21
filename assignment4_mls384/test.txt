@@ -1,0 +1,7 @@
+move right
+move down
+move right
+solve A* h1 -b*
+solve A* h2 -b*
+solve BFS -b*
+solve DFS -b*

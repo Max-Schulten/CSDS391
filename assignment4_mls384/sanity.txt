@@ -1,0 +1,11 @@
+move right
+move down
+move right
+move down
+move up
+move up 
+move left
+move down
+move down
+solve A* h1
+solve A* h2
