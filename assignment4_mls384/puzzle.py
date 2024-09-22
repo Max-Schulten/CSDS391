@@ -284,8 +284,10 @@ def findZero(state=None):
 
 
 # Method for DFS, iterative implementation
-def dfs(maxnodes):
+def dfs(maxnodes, suppress=False):
     global used
+
+    used = {}
 
     # Checking if argument for maxnodes was provided in txt file
     if maxnodes == -1:
@@ -302,41 +304,44 @@ def dfs(maxnodes):
     # Defining an array with the solution steps as elements
     solution = None
 
-    # Actual BFS search implementation
+    # Actual DFS search implementation
     while len(stack) != 0 and counter < maxnodes:
         node = stack.pop()
+        used[str(node.state)] = True
         # Add current node to see states
-        statecheck(node)
-        # If we've reached the goal the backtrack function will recursively find the solution steps
+        # If we've reached the goal, backtrack function will recursively find the solution steps
         if node.state == goal_state:
             solution = backtrack(node)
             break
         else:
-            for child in node.children:
+            array = copy.deepcopy(node.children)
+            array2 = array[::-1]
+            # Generating children (successor nodes)
+            for child in array2:
                 if counter < maxnodes:
-                    next = move(child, state=copy.deepcopy(node.state))
-                    if statecheck(next):
+                    next_state = move(child, state=copy.deepcopy(node.state))
+                    if statecheck(next_state):
                         newChild = Node(parent=node, direction=child)
                         stack.append(newChild)
                         counter += 1
                 else:
                     break
+
     # Check all remaining created but unvisited nodes
-    # Doesn't count towards created nodes
     for node in stack:
         if node.state == goal_state:
             solution = backtrack(node)
-
-    # Checking if a solution has been found
-    if not solution:
-        print(f"Error: maxnodes limit ({maxnodes}) reached: {lineNumber}")
-        return None
-    else:
-        string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:"
-        for mv in solution:
-            if mv:
-                string += f"\nmove {mv}\n"
-        print(string)
+    if not suppress:
+        # Checking if a solution has been found
+        if not solution:
+            print(f"Error: maxnodes limit ({maxnodes}) reached: {lineNumber}")
+            return None
+        else:
+            string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:"
+            for mv in solution:
+                if mv:
+                    string += f"\nmove {mv}\n"
+            print(string)
 
     return {
         "depth": len(solution)-1,
@@ -348,7 +353,7 @@ def dfs(maxnodes):
 
 
 # BFS implementation
-def bfs(maxnodes):
+def bfs(maxnodes, suppress=False):
     # Checking if argument was provided
     if maxnodes == -1:
         maxnodes = 1000
@@ -383,16 +388,17 @@ def bfs(maxnodes):
         if node.state == goal_state:
             solution = backtrack(node)
 
-    # Checking if a solution was found
-    if not solution:
-        print(f"Error: maxnodes limit ({maxnodes}) reached")
-        return None
-    else:
-        string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:\n"
-        for move in solution:
-            if move:
-                string += f"move {move}\n"
-        print(string)
+    if not suppress:
+        # Checking if a solution was found
+        if not solution:
+            print(f"Error: maxnodes limit ({maxnodes}) reached")
+            return None
+        else:
+            string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:\n"
+            for move in solution:
+                if move:
+                    string += f"move {move}\n"
+            print(string)
 
     # Returns nodes and depth of solution
     return {
@@ -452,7 +458,7 @@ def displacement(element, coords):
 
 
 # A* implementation
-def astar(maxnodes, heuristic):
+def astar(maxnodes, heuristic, suppress=False):
     # Max nodes handling in case no arg provided
     if maxnodes == -1:
         maxnodes = 1000
@@ -497,15 +503,16 @@ def astar(maxnodes, heuristic):
                         counter += 1
                 else:
                     break
-    if not solution:
-        print(f"Error: maxnodes limit ({maxnodes}) reached")
-        return None
-    else:
-        string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:\n"
-        for turn in solution:
-            if turn:
-                string += f"move {turn}\n"
-        print(string)
+    if not suppress:
+        if not solution:
+            print(f"Error: maxnodes limit ({maxnodes}) reached")
+            return None
+        else:
+            string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:\n"
+            for turn in solution:
+                if turn:
+                    string += f"move {turn}\n"
+            print(string)
     # Reset set since it persists otherwise (caused me a massive headache lol)
     used = {}
 
