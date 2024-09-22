@@ -354,6 +354,9 @@ def dfs(maxnodes, suppress=False):
 
 # BFS implementation
 def bfs(maxnodes, suppress=False):
+    global used
+
+    used = {}
     # Checking if argument was provided
     if maxnodes == -1:
         maxnodes = 1000
@@ -372,15 +375,18 @@ def bfs(maxnodes, suppress=False):
     # Actual BFS search implementation
     while queue and counter < maxnodes:
         node = queue.pop(0)
+        used[str(node.state)] = True
         if node.state == goal_state:
             solution = backtrack(node)
             break
         else:
             for child in node.children:
                 if counter < maxnodes:
-                    newChild = Node(parent=node, direction=child)
-                    queue.append(newChild)
-                    counter += 1
+                    next_state = move(child, state=copy.deepcopy(node.state))
+                    if statecheck(next_state):
+                        newChild = Node(parent=node, direction=child)
+                        queue.append(newChild)
+                        counter += 1
                 else:
                     break
     # Iterating over all unvisitied, but previously created nodes to find solution if there
@@ -395,9 +401,9 @@ def bfs(maxnodes, suppress=False):
             return None
         else:
             string = f"Nodes created during search: {counter}\nSolution length = {len(solution)-1}\nMove sequence:\n"
-            for move in solution:
-                if move:
-                    string += f"move {move}\n"
+            for mov in solution:
+                if mov:
+                    string += f"move {mov}\n"
             print(string)
 
     # Returns nodes and depth of solution
@@ -472,6 +478,8 @@ def astar(maxnodes, heuristic, suppress=False):
 
     global used
 
+    used = {}
+
     # Initializing the root
     root = Node(state=current_state, cost=0)
 
@@ -516,6 +524,7 @@ def astar(maxnodes, heuristic, suppress=False):
     # Reset set since it persists otherwise (caused me a massive headache lol)
     used = {}
 
+
     return {
         "depth": len(solution)-1,
         "nodes": counter,
@@ -533,24 +542,19 @@ def statecheck(state):
 
 # Helper method for newton's Method
 def f(bstar, nodes, depth):
-    # Moving over N+1 term
-    result = -1*(nodes+1)
-
-    # Calculating the summation
-    for i in range(depth+1):
+    # Initialize result, handling the (-N-1) term
+    result = -1 * (nodes + 1)
+    for i in range(depth + 1):
         result += bstar**i
-
     return result
 
 
 # Helper method for newton's Method
 def fprime(bstar, depth):
+    # Initialize the derivative result
     result = 0
-
-    # Calculating the summation of f's derivative
-    for i in range(depth+1):
+    for i in range(1, depth + 1):  # Starting from 1 since the 0th term contributes 0 to the derivative
         result += i*(bstar**(i-1))
-
     return result
 
 
@@ -559,25 +563,29 @@ def branchingFactor(nodes, depth, maxIter=500):
     # Creating a guess for bstar
     bstar = nodes/depth
 
-    # While bstar is not sufficiently accurate execute newton's method
-    for _ in range(maxIter):
-        fOut = f(bstar, nodes, depth)
+    try:
+        # While bstar is not sufficiently accurate execute newton's method
+        for _ in range(maxIter):
+            fOut = f(bstar, nodes, depth)
 
-        fPrimeOut = fprime(bstar, depth)
+            fPrimeOut = fprime(bstar, depth)
 
-        if fPrimeOut == 0:
-            print("Error: Cannot divide by 0")
-            return None
+            if fPrimeOut == 0:
+                print("Error: Cannot divide by 0")
+                return None
 
-        bstarNext = bstar - fOut / fPrimeOut
+            bstarNext = bstar - fOut / fPrimeOut
 
-        if abs(bstarNext - bstar) < 0.000001:
-            return bstar
+            if abs(bstarNext - bstar) < 0.000001:
+                return bstar
 
-        bstar = bstarNext
+            bstar = bstarNext
+    except OverflowError:
+        return math.inf
 
     print("Max iteration reached")
     return bstar
+
 
 
 # Standard Python convention to run the main method when the script is executed directly.
