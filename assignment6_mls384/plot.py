@@ -1,23 +1,39 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def main():
-    # Need to model the actual type of the bag
-    bags = {
-        "a": {"dist": [100, 0], "prob": 0.1},
-        "b": {"dist": [75, 25], "prob": 0.2},
-        "c": {"dist": [50, 50], "prob": 0.4},
-        "d": {"dist": [25, 75], "prob": 0.2},
-        "e": {"dist": [0, 100], "prob": 0.1}
-    }
+
+def main(bags, n, trueBag):
+
+    # Initialize a dictionary to keep track of the respective calculated
+    # probabilities at each observation
+    probs = {key: [bags.get(key).get("prob")] for key in bags}
+
+    # True bag type
+    trueBag = bags.get(trueBag)
+
+    # Keep track of observations
+    observations = []
 
     # Number of observations (x-axis)
-    x = np.arange(0, 11)
+    x = np.arange(0, n)
 
-    # Plot
-    p_h1_d = postCalc(bags.get("a").get("prob"), bags.get("a").get("dist"), x)
+    for i in x:
+        # Take a candy from trueBag and add it to the list of observations
+        data = take(trueBag)
+        observations.append(data)
 
-    plt.plot(x, p_h1_d, label=r'$P(h_1|d)$', marker='o', linestyle='-')
+        for key, hypothesis in bags.items():
+            # Calcuate the probability of each hypothesis and add it to the
+            # dicttionary with its corresponding array
+            probs.get(key).append(postCalc(prob=hypothesis.get("prob"),
+                                           dist=hypothesis.get("dist"),
+                                           observation=data,
+                                           observations=observations,
+                                           bags=bags))
+
+    for key, probabilities in probs.items():
+        plt.plot(np.arange(0, n+1), probabilities, label=rf'${key}$',
+                 marker='x', linestyle='--')
 
     # Formatting the plot
     plt.xlabel('Number of observations in d')
@@ -32,8 +48,45 @@ def main():
     plt.show()
 
 
-def postCalc(prob, dist, x):
-    return x/3
+# Finds p(h_i|d)
+def postCalc(prob, dist, observation, observations, bags):
+    # Calculating P(d|h_i)
+    d_given_h = 1
+
+    # Take product
+    for j in observations:
+        d_given_h *= dist[j]
+
+    # Multiply by the probability of the hypothesis
+    h_given_d = d_given_h * prob
+
+    # Find proportionality constant
+    alpha = 0
+    for h in bags.values():
+        likelihood = 1
+        for j in observations:
+            likelihood *= h["dist"][j]
+        alpha += likelihood * h["prob"]
+
+    return h_given_d / alpha
+
+
+def take(bag):
+    # Select a random index, representing a candy, with given probability
+    indices = np.arange(len(bag.get("dist")))
+
+    return np.random.choice(indices, p=bag.get("dist"))
+
 
 if __name__ == "__main__":
-    main()
+    main(
+        bags={
+            "P(h_1|d)": {"dist": [1, 0.0], "prob": 0.1},
+            "P(h_2|d)": {"dist": [0.75, 0.25], "prob": 0.2},
+            "P(h_3|d)": {"dist": [0.50, 0.50], "prob": 0.4},
+            "P(h_4|d)": {"dist": [0.25, 0.75], "prob": 0.2},
+            "P(h_5|d)": {"dist": [0.0, 1], "prob": 0.1}
+        },
+        n=15,
+        trueBag="P(h_5|d)"
+    )
