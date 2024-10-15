@@ -117,27 +117,27 @@ We conclude that test $B$ is more indicative of the patient having the virus. Th
 ### a)
 Let $T$ represent what color was testified under oath, and let $C$ be the true color of the taxi. We look to find a way to compute the most likely color. We can do this by taking $\max{\{P(C = green|T=green), 1-P(C=green|T=green)\}}$. Using Bayes' theorem we can say:
 $$
-P(C=green|T=green) = \frac{P(T=green|C=green)P(C=green)}{P(T=green)}
+P(C=blue|T=blue) = \frac{P(T=blue|C=blue)P(C=blue)}{P(T=blue)}
 $$
 However, we have no information on the distribution of taxis in Athens; namely $P(C)$. So, we cannot find this probability!
 
 ### b)
 Now we have $P(C=green) = 0.9$ and implicitly $P(C=blue) = 0.1$. Returning back to the above we find:
 $$
-P(C=green|T=green) = \frac{P(T=green|C=green)P(C=green)}{P(T=green)} = \frac{0.75\cdot0.9}{\sum_C{P(T=green,C)}}
+P(C=blue|T=blue) = \frac{P(T=blue|C=blue)P(C=blue)}{P(T=blue)} = \frac{0.75\cdot0.1}{\sum\limits_C{P(T=blue,C)}}
 $$
 
 We know:
 $$
-P(T=green) = \sum_C P(T=green,C) = \sum_C P(T=green|C)P(C) = 0.75\cdot0.9 + 0.25 \cdot 0.1 = 0.7
+P(T=blue) = \sum_C P(T=blue,C) = \sum_C P(T=blue|C)P(C) = 0.75\cdot0.1 + 0.25 \cdot 0.9 = 0.3
 $$
 
 So:
 $$
-P(C=green|T=green) = \frac{0.75 \cdot 0.9}{0.7} = 0.9643 = 96.43\%
+P(C=green|T=green) = \frac{0.75 \cdot 0.1}{0.3} = 0.25 = 25\%
 $$
 
-It goes without saying then that $\max{\{P(C = green|T=green), 1-P(C=green|T=green)\}} = P(C = green|T=green) = 0.9643$. Therefore, given that we testify the taxi is green, there is a $96.43\%$ chance the taxi is in fact green.
+It goes without saying then that $\max{\{P(C = green|T=green), 1-P(C=green|T=green)\}} = P(C = green|T=green) = 0.75$. Therefore, given that we testify the taxi is blue, there is a $25\%$ chance the taxi is in fact green, and a $25\%$ it is blue, mainly by virtue of the rarity of blue taxis.
 
 # Exercise 5
 
@@ -226,7 +226,7 @@ P(G=T|L=T \lor V=T) = \frac{P(G=T, L=T \lor V=T)}{P(L=T \lor V=T)} = \frac{0.000
 ### e)
 Let us translate the problem statement. We do not have any information on $V$, hence we treat it as we would if it hadn't been mentioned.
 \(
-P(L=F|G=T) = 0.0215556
+P(L=F|G=T) = 0.494
 \)
 
 # Exercise 6
@@ -239,7 +239,6 @@ $$
 The reason why certain posterior probabilities begin at 0.2, others at 0.1, and one at 0.4 is defined in the problem. When we haven't observed any candy we have no ability to infer beyond the probabilities of each bag type, which is what is modeled at $n=0$.
 
 ### b)
-![Plot](figure_1.png)
 The most relevant code snippets are below:
 ```{py}
 if __name__ == "__main__":
@@ -324,3 +323,21 @@ Essentially, the simulation (if you will) works by drawing a candy from the bag.
 
 #### Plotting
 Finally, I used `matplotlib` to easily plot the given probabilities of each hypothesis at discrete steps, i.e. every time we pull a candy from the bag. 
+
+### c)
+
+![An $h_5$ Plot](figure_1.png)
+
+![An $h_2$ Plot](figure_2.png)
+Clearly we are considerably more confident in the $h_5$ scenario at a much earlier stage. After the 3rd candy is sampled, we are always most confident in the $h_5$ hypothesis. In contrast, at the 3rd sample during the $h_2$ plot we are actually more confident in the $h_1$ hypothesis. Eventually $P(h_2|d)$ starts to dominate, but it is much more erratic and considerably less clear. Just by inspection we see $P(h_5|d) > 0.8$ for its appropriate plot yet $P(h_2|d) < 0.8$ for its plot.
+
+### d)
+We need:
+$$
+P(h_i|\textbf{d}) = \alpha P(\textbf{d}|h_i)P(h_i) > 0.9
+$$
+After substituting the expressions for the given problem we find:
+$$
+\alpha P(h_i) \prod_j P(d_j|h_i) > 0.9 \implies \prod_j P(d_j|h_i) > \frac{0.9}{\alpha P(h_i)}
+$$
+So we need to find $j$ such that the product of the probabilities of each observation assuming the hypothesis $h_i$. I believe this is the best we can do without a specific example, or a given sequence of pulls from the bag. Namely, if we have an $h_3$ bag and pull all limes for 100 trials vs. perfectly alternating lime and cherry. Though the former is*extremely* unlikely, this would result in very different values for $j$ (one much much higher) than the latter case. 

@@ -23,8 +23,8 @@ def main(bags, n, trueBag):
         observations.append(data)
 
         for key, hypothesis in bags.items():
-            # Calcuate the probability of each hypothesis and add it to the
-            # dicttionary with its corresponding array
+            # Calculate the probability of each hypothesis and add it to the
+            # dictionary with its corresponding array
             probs.get(key).append(postCalc(prob=hypothesis.get("prob"),
                                            dist=hypothesis.get("dist"),
                                            observation=data,
@@ -39,7 +39,7 @@ def main(bags, n, trueBag):
     plt.xlabel('Number of observations in d')
     plt.ylabel('Posterior Probability')
     plt.ylim(0, 1)
-    plt.xlim(0, 10)
+    plt.xlim(0, n)
     plt.legend(loc='best')
     plt.grid(True)
     plt.tight_layout()
@@ -87,6 +87,6 @@ if __name__ == "__main__":
             "P(h_4|d)": {"dist": [0.25, 0.75], "prob": 0.2},
             "P(h_5|d)": {"dist": [0.0, 1], "prob": 0.1}
         },
-        n=15,
-        trueBag="P(h_5|d)"
+        n=50,
+        trueBag="P(h_2|d)"
     )
